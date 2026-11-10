@@ -1,0 +1,5 @@
+export const RUNTIME_PROFILE = Object.freeze({
+  PRIMARY_BROKER: 'PRIMARY_BROKER',
+  BASE_TEMPORARY: 'BASE_TEMPORARY',
+  BASE: 'BASE',
+});
