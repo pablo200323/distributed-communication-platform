@@ -1,0 +1,20 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY docker/runtime-package.json ./package.json
+RUN npm install --omit=dev --ignore-scripts
+
+COPY docker/RunObserverNode.js ./docker/RunObserverNode.js
+COPY src/middleware/BrokerSession.js ./src/middleware/BrokerSession.js
+COPY src/middleware/EncryptedMessage.js ./src/middleware/EncryptedMessage.js
+COPY src/middleware/Message.js ./src/middleware/Message.js
+COPY src/middleware/MessageSecurityContract.js ./src/middleware/MessageSecurityContract.js
+COPY src/middleware/MessageSecurityContracts.js ./src/middleware/MessageSecurityContracts.js
+COPY src/middleware/NodeSecurityManager.js ./src/middleware/NodeSecurityManager.js
+COPY src/middleware/NodeMessageManager.js ./src/middleware/NodeMessageManager.js
+COPY src/middleware/ObserverNode.js ./src/middleware/ObserverNode.js
+COPY src/middleware/RuntimeLogger.js ./src/middleware/RuntimeLogger.js
+COPY src/middleware/SessionManager.js ./src/middleware/SessionManager.js
+
+CMD ["node", "docker/RunObserverNode.js"]

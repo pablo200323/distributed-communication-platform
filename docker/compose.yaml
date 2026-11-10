@@ -1,0 +1,107 @@
+name: platform
+
+services:
+  broker-1:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.manager
+    environment:
+      BROKER_ID: broker-1
+      BROKER_TYPE: PRIMARY
+      BROKER_BATTERY_PCT: 90
+    env_file:
+      - ../.generated/platform-security.env
+    ports:
+      - '19101:9001'
+      - '19181:8883'
+    volumes:
+      - ../.generated/platform-tls/docker-brokers/broker-1:/mosquitto/tls:ro
+    networks:
+      - platform-network
+
+  broker-2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.manager
+    environment:
+      BROKER_ID: broker-2
+      BROKER_TYPE: PRIMARY
+      BROKER_BATTERY_PCT: 75
+    env_file:
+      - ../.generated/platform-security.env
+    ports:
+      - '19102:9001'
+      - '19182:8883'
+    volumes:
+      - ../.generated/platform-tls/docker-brokers/broker-2:/mosquitto/tls:ro
+    networks:
+      - platform-network
+
+  broker-3:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.manager
+    environment:
+      BROKER_ID: broker-3
+      BROKER_TYPE: TEMPORARY
+      BROKER_BATTERY_PCT: 55
+    env_file:
+      - ../.generated/platform-security.env
+    ports:
+      - '19103:9001'
+      - '19183:8883'
+    volumes:
+      - ../.generated/platform-tls/docker-brokers/broker-3:/mosquitto/tls:ro
+    networks:
+      - platform-network
+
+  observer-1:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.observer
+    environment:
+      MESSAGE_STORAGE_DIRECTORY: /app/data
+      OBSERVER_ID: observer-1
+      BROKERS: >-
+        [{"brokerId":"broker-1","brokerUrl":"mqtt://broker-1:1883"},{"brokerId":"broker-2","brokerUrl":"mqtt://broker-2:1883"},{"brokerId":"broker-3","brokerUrl":"mqtt://broker-3:1883"}]
+    env_file:
+      - ../.generated/platform-security.env
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+    volumes:
+      - observer-1-messages:/app/data
+    networks:
+      - platform-network
+
+  observer-2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.observer
+    environment:
+      MESSAGE_STORAGE_DIRECTORY: /app/data
+      OBSERVER_ID: observer-2
+      BROKERS: >-
+        [{"brokerId":"broker-1","brokerUrl":"mqtt://broker-1:1883"},{"brokerId":"broker-2","brokerUrl":"mqtt://broker-2:1883"},{"brokerId":"broker-3","brokerUrl":"mqtt://broker-3:1883"}]
+    env_file:
+      - ../.generated/platform-security.env
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+    volumes:
+      - observer-2-messages:/app/data
+    networks:
+      - platform-network
+
+networks:
+  platform-network:
+    name: platform-network
+    driver: bridge
+
+volumes:
+  observer-1-messages:
+    name: platform-observer-1-messages
+  observer-2-messages:
+    name: platform-observer-2-messages
